@@ -15,3 +15,6 @@ val REQUEST_NEW_CHATS = 1922
 val DATA_USER_CHATS = "userChats"    //child baru di table user
 val DATA_CHATS = "Chats"             // table baru Chats
 val DATA_CHAT_PARTICIPANTS = "chatParticipants" //child baru di table Chats
+
+val DATA_CHAT_MESSAGE = "messages"
+val DATA_CHAT_MESSAGE_TIME = "messageTime"

@@ -30,7 +30,7 @@ class ChatsFragment : Fragment(), ChatClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (userId.isNullOrEmpty()){
+        if (userId.isNullOrEmpty()) {
             failureCallback?.userError()
         }
     }
@@ -54,33 +54,42 @@ class ChatsFragment : Fragment(), ChatClickListener {
         }
 
         firebaseDb.collection(DATA_USERS).document(userId!!)
-            .addSnapshotListener {documentSnapshot, firebaseFirestoreException ->
-                if (firebaseFirestoreException == null){
+            .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+                if (firebaseFirestoreException == null) {
                     refreshChats()
                 }
             }
     }
 
     override fun onChatClicked(
-        name: String?,
+        chatId: String?,
         otherUserId: String?,
         chatsImageUrl: String?,
         chatsName: String?
     ) {
-        startActivity(Intent(context, ConversationActivity::class.java))
+        startActivity(
+            ConversationActivity.newIntent(
+                context,
+                chatId,
+                chatsImageUrl,
+                otherUserId,
+                chatsName
+            )
+        )
     }
 
-    fun newChat(partnerId: String){
+    fun newChat(partnerId: String) {
         firebaseDb.collection(DATA_USERS).document(userId!!).get()
             .addOnSuccessListener { userDocument ->
                 val userChatPartner = hashMapOf<String, String>()
                 if (userDocument[DATA_USER_CHATS] != null &&
-                        userDocument[DATA_USER_CHATS] is HashMap<*,*>){
+                    userDocument[DATA_USER_CHATS] is HashMap<*, *>
+                ) {
                     val userDocumentMap = userDocument[DATA_USER_CHATS] as HashMap<String, String>
 
-                    if (userDocumentMap.containsKey(partnerId)){
+                    if (userDocumentMap.containsKey(partnerId)) {
                         return@addOnSuccessListener
-                    }else{
+                    } else {
                         userChatPartner.putAll(userDocumentMap)
                     }
                 }
@@ -91,8 +100,10 @@ class ChatsFragment : Fragment(), ChatClickListener {
                     .addOnSuccessListener { partnerDocument ->
                         val partnerChatPartners = hashMapOf<String, String>()
                         if (partnerDocument[DATA_USER_CHATS] != null &&
-                                partnerDocument[DATA_USER_CHATS] is HashMap<*,*>){
-                            val partnerDocumentMap = partnerDocument[DATA_USER_CHATS] as HashMap<String, String>
+                            partnerDocument[DATA_USER_CHATS] is HashMap<*, *>
+                        ) {
+                            val partnerDocumentMap =
+                                partnerDocument[DATA_USER_CHATS] as HashMap<String, String>
                             partnerChatPartners.putAll(partnerDocumentMap)
                         }
 
@@ -111,7 +122,7 @@ class ChatsFragment : Fragment(), ChatClickListener {
                         batch.commit()
                     }
 
-                    .addOnFailureListener {e ->
+                    .addOnFailureListener { e ->
                         e.printStackTrace()
                     }
             }
@@ -121,19 +132,19 @@ class ChatsFragment : Fragment(), ChatClickListener {
             }
     }
 
-    fun setFailureCallBackListener(listener: FailureCallback){
+    fun setFailureCallBackListener(listener: FailureCallback) {
         failureCallback = listener
     }
 
-    private fun refreshChats(){
+    private fun refreshChats() {
         firebaseDb.collection(DATA_USERS).document(userId!!).get()
             .addOnSuccessListener {
-                if (it.contains(DATA_USER_CHATS)){
+                if (it.contains(DATA_USER_CHATS)) {
                     val partners = it[DATA_USER_CHATS]
                     val chats = arrayListOf<String>()
 
-                    for (partner in (partners as HashMap<String, String>).keys){
-                        if (partners[partner] != null){
+                    for (partner in (partners as HashMap<String, String>).keys) {
+                        if (partners[partner] != null) {
                             chats.add(partners[partner]!!)
                         }
                     }
