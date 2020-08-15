@@ -2,8 +2,11 @@ package com.ziadsyahrul.whatsappcloneziad
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.ziadsyahrul.whatsappcloneziad.adapter.ConversationAdapter
 import com.ziadsyahrul.whatsappcloneziad.util.*
 import kotlinx.android.synthetic.main.activity_conversation.*
+import kotlinx.android.synthetic.main.activity_sign_up.*
 
 class ConversationActivity : AppCompatActivity() {
 
@@ -24,6 +28,7 @@ class ConversationActivity : AppCompatActivity() {
     private var imageUrl: String? = null
     private var otherUserId: String? = null
     private var chatName: String? = null
+    private var phone: String? = null
 
     companion object {
         private val PARAM_CHAT_ID = "Chat_id"
@@ -55,6 +60,7 @@ class ConversationActivity : AppCompatActivity() {
         setSupportActionBar(toolbar_conversation)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
         toolbar_conversation.setNavigationOnClickListener { onBackPressed() }
 
         chatId = intent.extras?.getString(PARAM_CHAT_ID)
@@ -119,5 +125,32 @@ class ConversationActivity : AppCompatActivity() {
                 edt_message.setText("", TextView.BufferType.EDITABLE) // add editText
             }
         }
+
+        firebaseDb.collection(DATA_USERS).document(userId!!).get()
+            .addOnSuccessListener {
+                val user = it.toObject(User::class.java)
+                phone = user?.phone
+            }
+            .addOnFailureListener { e ->
+                e.printStackTrace()
+                finish()
+            }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_conversation, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.action_profile -> {
+                startActivity(Intent(this, ProfileActivity::class.java))
+            }
+            R.id.action_call -> {
+                startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
+            }
+        }
+        return super.onOptionsItemSelected(item)   //DONE:)
     }
 }
